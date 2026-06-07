@@ -1,9 +1,18 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'telas/tela_lista.dart';
 import 'utils/constantes.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializa o sqflite_common_ffi em plataformas desktop (Linux, Windows, macOS)
+  if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+
   runApp(const MeuAcervoApp());
 }
 
