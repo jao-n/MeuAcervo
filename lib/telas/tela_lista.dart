@@ -18,6 +18,7 @@ class _TelaListaState extends State<TelaLista> {
   final BancoDeDadosHelper _dbHelper = BancoDeDadosHelper();
   List<Livro> _livros = [];
   bool _carregando = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -27,13 +28,27 @@ class _TelaListaState extends State<TelaLista> {
 
   /// Busca os livros no banco de dados e atualiza o estado da tela.
   Future<void> _atualizarLista() async {
-    setState(() => _carregando = true);
-    final livros = await _dbHelper.buscarTodos();
-    if (!mounted) return;
     setState(() {
-      _livros = livros;
-      _carregando = false;
+      _carregando = true;
+      _erro = null;
     });
+
+    try {
+      final livros = await _dbHelper.buscarTodos();
+      if (!mounted) return;
+      setState(() {
+        _livros = livros;
+        _carregando = false;
+        _erro = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _livros = [];
+        _carregando = false;
+        _erro = e.toString();
+      });
+    }
   }
 
   /// Navega para a tela de cadastro e atualiza a lista ao retornar.
@@ -62,18 +77,20 @@ class _TelaListaState extends State<TelaLista> {
       ),
       body: _carregando
           ? const Center(child: CircularProgressIndicator())
-          : _livros.isEmpty
-              ? const Center(child: Text(Constantes.listaVazia))
-              : ListView.builder(
-                  itemCount: _livros.length,
-                  itemBuilder: (context, indice) {
-                    final livro = _livros[indice];
-                    return ItemLivro(
-                      livro: livro,
-                      aoTocar: () => _navegarParaDetalhes(livro.id!),
-                    );
-                  },
-                ),
+          : _erro != null
+              ? Center(child: Text('Erro: ${_erro}'))
+              : _livros.isEmpty
+                  ? const Center(child: Text(Constantes.listaVazia))
+                  : ListView.builder(
+                      itemCount: _livros.length,
+                      itemBuilder: (context, indice) {
+                        final livro = _livros[indice];
+                        return ItemLivro(
+                          livro: livro,
+                          aoTocar: () => _navegarParaDetalhes(livro.id!),
+                        );
+                      },
+                    ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navegarParaCadastro,
         tooltip: Constantes.descAdicionar,

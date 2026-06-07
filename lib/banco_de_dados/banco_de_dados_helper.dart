@@ -1,5 +1,6 @@
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
+//import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../modelos/livro.dart';
 
 /// Helper para gerenciar as operações do banco de dados SQLite.
